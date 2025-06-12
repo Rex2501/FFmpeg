@@ -30,3 +30,4 @@ jobs:
     # Runs a single command using the runners shell
     - name: Send greeting
       run: echo "Hello ${{ inputs.name }}"
+[![Manual workflow](https://github.com/Rex2501/FFmpeg/actions/workflows/manual.yml/badge.svg?branch=999)](https://github.com/Rex2501/FFmpeg/actions/workflows/manual.yml)
