@@ -73,6 +73,7 @@
 #define AV_PROFILE_AAC_HE_V2       28
 #define AV_PROFILE_AAC_LD          22
 #define AV_PROFILE_AAC_ELD         38
+#define AV_PROFILE_AAC_USAC        41
 #define AV_PROFILE_MPEG2_AAC_LOW  128
 #define AV_PROFILE_MPEG2_AAC_HE   131
 
@@ -159,6 +160,7 @@
 #define AV_PROFILE_HEVC_MAIN_10                     2
 #define AV_PROFILE_HEVC_MAIN_STILL_PICTURE          3
 #define AV_PROFILE_HEVC_REXT                        4
+#define AV_PROFILE_HEVC_MULTIVIEW_MAIN              6
 #define AV_PROFILE_HEVC_SCC                         9
 
 #define AV_PROFILE_VVC_MAIN_10                      1
@@ -192,9 +194,25 @@
 #define AV_PROFILE_EVC_BASELINE             0
 #define AV_PROFILE_EVC_MAIN                 1
 
+#define AV_PROFILE_APV_422_10  33
+#define AV_PROFILE_APV_422_12  44
+#define AV_PROFILE_APV_444_10  55
+#define AV_PROFILE_APV_444_12  66
+#define AV_PROFILE_APV_4444_10 77
+#define AV_PROFILE_APV_4444_12 88
+#define AV_PROFILE_APV_400_10  99
+
 
 #define AV_LEVEL_UNKNOWN                  -99
 
+enum AVFieldOrder {
+    AV_FIELD_UNKNOWN,
+    AV_FIELD_PROGRESSIVE,
+    AV_FIELD_TT,          ///< Top coded_first, top displayed first
+    AV_FIELD_BB,          ///< Bottom coded first, bottom displayed first
+    AV_FIELD_TB,          ///< Top coded first, bottom displayed first
+    AV_FIELD_BT,          ///< Bottom coded first, top displayed first
+};
 
 /**
  * @ingroup lavc_decoding

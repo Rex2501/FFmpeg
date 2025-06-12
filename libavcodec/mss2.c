@@ -24,12 +24,12 @@
  */
 
 #include "libavutil/avassert.h"
+#include "libavutil/mem.h"
 #include "codec_internal.h"
 #include "decode.h"
 #include "error_resilience.h"
 #include "mpeg_er.h"
 #include "mpegvideodec.h"
-#include "qpeldsp.h"
 #include "vc1.h"
 #include "wmv2data.h"
 #include "mss12.h"
@@ -382,7 +382,7 @@ static int decode_wmv9(AVCodecContext *avctx, const uint8_t *buf, int buf_size,
     MSS12Context *c   = &ctx->c;
     VC1Context *v     = avctx->priv_data;
     MpegEncContext *s = &v->s;
-    AVFrame *f;
+    MPVWorkPicture *f;
     int ret;
 
     ff_mpeg_flush(avctx);
@@ -422,7 +422,7 @@ static int decode_wmv9(AVCodecContext *avctx, const uint8_t *buf, int buf_size,
     ff_vc1_decode_blocks(v);
 
     if (v->end_mb_x == s->mb_width && s->end_mb_y == s->mb_height) {
-        ff_er_frame_end(&s->er);
+        ff_er_frame_end(&s->er, NULL);
     } else {
         av_log(v->s.avctx, AV_LOG_WARNING,
                "disabling error correction due to block count mismatch %dx%d != %dx%d\n",
@@ -431,7 +431,7 @@ static int decode_wmv9(AVCodecContext *avctx, const uint8_t *buf, int buf_size,
 
     ff_mpv_frame_end(s);
 
-    f = s->current_picture.f;
+    f = &s->cur_pic;
 
     if (v->respic == 3) {
         ctx->dsp.upsample_plane(f->data[0], f->linesize[0], w,      h);
@@ -844,7 +844,7 @@ static av_cold int wmv9_init(AVCodecContext *avctx)
     v->resync_marker   = 0;
     v->rangered        = 0;
 
-    v->s.max_b_frames = avctx->max_b_frames = 0;
+    v->max_b_frames    = avctx->max_b_frames = 0;
     v->quantizer_mode = 0;
 
     v->finterpflag = 0;
@@ -886,14 +886,10 @@ static av_cold int mss2_decode_init(AVCodecContext *avctx)
     c->pal_stride   = c->mask_stride;
     c->pal_pic      = av_mallocz(c->pal_stride * avctx->height);
     c->last_pal_pic = av_mallocz(c->pal_stride * avctx->height);
-    if (!c->pal_pic || !c->last_pal_pic || !ctx->last_pic) {
-        mss2_decode_end(avctx);
+    if (!c->pal_pic || !c->last_pal_pic || !ctx->last_pic)
         return AVERROR(ENOMEM);
-    }
-    if (ret = wmv9_init(avctx)) {
-        mss2_decode_end(avctx);
+    if (ret = wmv9_init(avctx))
         return ret;
-    }
     ff_mss2dsp_init(&ctx->dsp);
 
     avctx->pix_fmt = c->free_colours == 127 ? AV_PIX_FMT_RGB555
@@ -913,4 +909,5 @@ const FFCodec ff_mss2_decoder = {
     .close          = mss2_decode_end,
     FF_CODEC_DECODE_CB(mss2_decode_frame),
     .p.capabilities = AV_CODEC_CAP_DR1,
+    .caps_internal  = FF_CODEC_CAP_INIT_CLEANUP,
 };
